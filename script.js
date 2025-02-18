@@ -82,13 +82,11 @@ function handleTouchMove(e) {
         }
 
         startDist = endDist;
-    } else if (e.touches.length === 1 && isDragging) {
+    } else if (e.touches.length === 1 && isDragging && scale > 1) {
         let dx = e.touches[0].clientX - startPos.x;
         let dy = e.touches[0].clientY - startPos.y;
 
-        if (scale > 1) { // Only allow dragging if zoomed in
-            img.style.transform = `translate(${lastTransform.x + dx}px, ${lastTransform.y + dy}px)`;
-        }
+        img.style.transform = `translate(${lastTransform.x + dx}px, ${lastTransform.y + dy}px)`;
     }
 }
 
@@ -121,11 +119,13 @@ function backToOptions() {
 
 // Mouse-based dragging support
 function handleMouseDown(e) {
-    isDragging = true;
-    startPos = {
-        x: e.clientX,
-        y: e.clientY
-    };
+    if (scale > 1) {  // Only allow dragging if zoomed in
+        isDragging = true;
+        startPos = {
+            x: e.clientX,
+            y: e.clientY
+        };
+    }
 }
 
 function handleMouseMove(e) {
