@@ -5,7 +5,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document Viewer</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            text-align: center;
+            padding-top: 30px;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        .buttons {
+            margin-bottom: 30px;
+        }
+
+        .buttons button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .buttons button:hover {
+            background-color: #45a049;
+        }
+
+        #imageContainer {
+            display: none;
+            position: relative;
+            width: 80%;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        #imageContainer img {
+            max-width: 100%;
+            cursor: grab;
+            transition: transform 0.1s ease;
+        }
+
+        #imageContainer img:active {
+            cursor: grabbing;
+        }
+
+    </style>
 </head>
 <body>
 
@@ -19,6 +74,97 @@
         <div id="imageContainer"></div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        let scale = 1;
+        let startPos = { x: 0, y: 0 };
+        let isDragging = false;
+        let img = document.createElement("img");
+        let container = document.getElementById("imageContainer");
+
+        function showImages(type) {
+            let buttons = document.getElementById("buttons");
+            let allButtons = buttons.querySelectorAll("button");
+
+            // Hide all buttons except the one clicked
+            allButtons.forEach(button => {
+                button.style.display = "none";
+            });
+
+            container.innerHTML = ""; // Clear previous images
+            container.style.display = "block"; // Show image container
+
+            if (type === "license") {
+                img.src = "https://i.imgur.com/CBZ6eMf.jpeg"; // Example image URL for driving license front
+                img.alt = "Driving Licence Front";
+            } else if (type === "registration") {
+                img.src = "https://i.imgur.com/18wIbSO.jpeg"; // Example image URL for bike registration front
+                img.alt = "Bike Registration Card Front";
+            } else if (type === "tax") {
+                img.src = "https://i.imgur.com/SockYv9.jpeg"; // Example image URL for tax token
+                img.alt = "Tax Token";
+            }
+
+            container.appendChild(img);
+            img.style.transform = "scale(1)";
+            scale = 1;
+            img.style.cursor = "grab";
+
+            img.addEventListener("mousedown", function(e) {
+                if (scale > 1) { // Only allow dragging if zoomed in
+                    isDragging = true;
+                    startPos = { x: e.clientX, y: e.clientY };
+                    img.style.cursor = "grabbing";
+                }
+            });
+
+            img.addEventListener("mousemove", function(e) {
+                if (isDragging && scale > 1) {
+                    let dx = e.clientX - startPos.x;
+                    let dy = e.clientY - startPos.y;
+                    let transform = `translate(${dx}px, ${dy}px) scale(${scale})`;
+                    img.style.transform = transform;
+                }
+            });
+
+            img.addEventListener("mouseup", function() {
+                if (isDragging) {
+                    isDragging = false;
+                    img.style.cursor = "grab";
+                    let transform = img.style.transform.match(/translate\((.*)px, (.*)px\)/);
+                    if (transform) {
+                        startPos = { x: parseFloat(transform[1]), y: parseFloat(transform[2]) };
+                    }
+                }
+            });
+
+            img.addEventListener("touchstart", function(e) {
+                if (e.touches.length === 2) {
+                    let startDist = getDistance(e.touches[0], e.touches[1]);
+                    img.style.transition = "none"; // Disable transition during zoom
+                    e.preventDefault();
+                }
+            });
+
+            img.addEventListener("touchmove", function(e) {
+                if (e.touches.length === 2) {
+                    let endDist = getDistance(e.touches[0], e.touches[1]);
+                    let scaleChange = endDist / startDist;
+                    scale = Math.min(Math.max(1, scale * scaleChange), 3); // Limit scale
+                    img.style.transform = `scale(${scale})`;
+                    e.preventDefault();
+                }
+            });
+
+            img.addEventListener("touchend", function() {
+                img.style.transition = "transform 0.1s ease"; // Re-enable transition after zoom
+            });
+        }
+
+        function getDistance(touch1, touch2) {
+            let x = touch1.clientX - touch2.clientX;
+            let y = touch1.clientY - touch2.clientY;
+            return Math.sqrt(x * x + y * y);
+        }
+    </script>
 </body>
 </html>
