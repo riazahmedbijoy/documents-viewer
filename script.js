@@ -72,17 +72,23 @@ function handleTouchMove(e) {
         scale += diff * 0.01;  // Adjust zoom sensitivity
         scale = Math.min(Math.max(1, scale), 3); // Limit scale to prevent extreme zoom
 
-        // Calculate the direction of the pinch
-        let dx = e.touches[0].clientX - e.touches[1].clientX;
-        let dy = e.touches[0].clientY - e.touches[1].clientY;
+        // Only allow movement if the image is zoomed in
+        if (scale > 1) {
+            let dx = e.touches[0].clientX - e.touches[1].clientX;
+            let dy = e.touches[0].clientY - e.touches[1].clientY;
 
-        // Apply both zoom and translation
-        img.style.transform = `scale(${scale}) translate(${lastTransform.x + dx * 0.1}px, ${lastTransform.y + dy * 0.1}px)`;
+            // Apply both zoom and translation
+            img.style.transform = `scale(${scale}) translate(${lastTransform.x + dx * 0.1}px, ${lastTransform.y + dy * 0.1}px)`;
+        }
+
         startDist = endDist;
     } else if (e.touches.length === 1 && isDragging) {
         let dx = e.touches[0].clientX - startPos.x;
         let dy = e.touches[0].clientY - startPos.y;
-        img.style.transform = `translate(${lastTransform.x + dx}px, ${lastTransform.y + dy}px)`;
+
+        if (scale > 1) { // Only allow dragging if zoomed in
+            img.style.transform = `translate(${lastTransform.x + dx}px, ${lastTransform.y + dy}px)`;
+        }
     }
 }
 
@@ -123,7 +129,7 @@ function handleMouseDown(e) {
 }
 
 function handleMouseMove(e) {
-    if (isDragging) {
+    if (isDragging && scale > 1) {  // Only allow dragging if zoomed in
         let dx = e.clientX - startPos.x;
         let dy = e.clientY - startPos.y;
         let img = e.target;
