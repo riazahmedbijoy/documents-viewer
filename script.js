@@ -2,6 +2,7 @@ let scale = 1;
 let startDist = 0;
 let startPos = { x: 0, y: 0 };
 let isDragging = false;
+let lastTransform = { x: 0, y: 0 };
 
 function showImages(type) {
     let container = document.getElementById("imageContainer");
@@ -64,24 +65,36 @@ function handleTouchStart(e) {
 }
 
 function handleTouchMove(e) {
+    let img = e.target;
     if (e.touches.length === 2) {
         let endDist = getDistance(e.touches[0], e.touches[1]);
         let diff = endDist - startDist;
         scale += diff * 0.01;  // Adjust zoom sensitivity
         scale = Math.min(Math.max(1, scale), 3); // Limit scale to prevent extreme zoom
-        e.target.style.transform = `scale(${scale})`;
+
+        // Calculate the direction of the pinch
+        let dx = e.touches[0].clientX - e.touches[1].clientX;
+        let dy = e.touches[0].clientY - e.touches[1].clientY;
+
+        // Apply both zoom and translation
+        img.style.transform = `scale(${scale}) translate(${lastTransform.x + dx * 0.1}px, ${lastTransform.y + dy * 0.1}px)`;
         startDist = endDist;
     } else if (e.touches.length === 1 && isDragging) {
         let dx = e.touches[0].clientX - startPos.x;
         let dy = e.touches[0].clientY - startPos.y;
-        let img = e.target;
-        img.style.transform += `translate(${dx}px, ${dy}px)`;
+        img.style.transform = `translate(${lastTransform.x + dx}px, ${lastTransform.y + dy}px)`;
     }
 }
 
-function handleTouchEnd() {
+function handleTouchEnd(e) {
     startDist = 0;  // Reset when touch ends
     isDragging = false; // Reset dragging state
+    // Store the current position after zoom or drag
+    let img = e.target;
+    let transform = img.style.transform.match(/translate\((.*)px, (.*)px\)/);
+    if (transform) {
+        lastTransform = { x: parseFloat(transform[1]), y: parseFloat(transform[2]) };
+    }
 }
 
 function getDistance(touch1, touch2) {
@@ -114,7 +127,7 @@ function handleMouseMove(e) {
         let dx = e.clientX - startPos.x;
         let dy = e.clientY - startPos.y;
         let img = e.target;
-        img.style.transform += `translate(${dx}px, ${dy}px)`;
+        img.style.transform = `translate(${lastTransform.x + dx}px, ${lastTransform.y + dy}px)`;
         startPos = {
             x: e.clientX,
             y: e.clientY
@@ -124,4 +137,9 @@ function handleMouseMove(e) {
 
 function handleMouseUp() {
     isDragging = false;
+    let img = event.target;
+    let transform = img.style.transform.match(/translate\((.*)px, (.*)px\)/);
+    if (transform) {
+        lastTransform = { x: parseFloat(transform[1]), y: parseFloat(transform[2]) };
+    }
 }
