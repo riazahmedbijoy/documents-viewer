@@ -3,6 +3,7 @@ let startDist = 0;
 let startPos = { x: 0, y: 0 };
 let isDragging = false;
 let lastTransform = { x: 0, y: 0 };
+let img;
 
 function showImages(type) {
     let container = document.getElementById("imageContainer");
@@ -41,15 +42,13 @@ function showImages(type) {
     `;
 
     // Add pinch-to-zoom and pan functionality
-    const images = container.querySelectorAll('.zoomable');
-    images.forEach(img => {
-        img.addEventListener("touchstart", handleTouchStart, { passive: true });
-        img.addEventListener("touchmove", handleTouchMove, { passive: true });
-        img.addEventListener("touchend", handleTouchEnd, { passive: true });
-        img.addEventListener("mousedown", handleMouseDown);
-        img.addEventListener("mousemove", handleMouseMove);
-        img.addEventListener("mouseup", handleMouseUp);
-    });
+    img = container.querySelector('.zoomable');
+    img.addEventListener("touchstart", handleTouchStart, { passive: true });
+    img.addEventListener("touchmove", handleTouchMove, { passive: true });
+    img.addEventListener("touchend", handleTouchEnd, { passive: true });
+    img.addEventListener("mousedown", handleMouseDown);
+    img.addEventListener("mousemove", handleMouseMove);
+    img.addEventListener("mouseup", handleMouseUp);
 }
 
 function handleTouchStart(e) {
@@ -65,7 +64,6 @@ function handleTouchStart(e) {
 }
 
 function handleTouchMove(e) {
-    let img = e.target;
     if (e.touches.length === 2) {
         let endDist = getDistance(e.touches[0], e.touches[1]);
         let diff = endDist - startDist;
@@ -94,7 +92,6 @@ function handleTouchEnd(e) {
     startDist = 0;  // Reset when touch ends
     isDragging = false; // Reset dragging state
     // Store the current position after zoom or drag
-    let img = e.target;
     let transform = img.style.transform.match(/translate\((.*)px, (.*)px\)/);
     if (transform) {
         lastTransform = { x: parseFloat(transform[1]), y: parseFloat(transform[2]) };
@@ -132,7 +129,6 @@ function handleMouseMove(e) {
     if (isDragging && scale > 1) {  // Only allow dragging if zoomed in
         let dx = e.clientX - startPos.x;
         let dy = e.clientY - startPos.y;
-        let img = e.target;
         img.style.transform = `translate(${lastTransform.x + dx}px, ${lastTransform.y + dy}px)`;
         startPos = {
             x: e.clientX,
@@ -143,7 +139,6 @@ function handleMouseMove(e) {
 
 function handleMouseUp() {
     isDragging = false;
-    let img = event.target;
     let transform = img.style.transform.match(/translate\((.*)px, (.*)px\)/);
     if (transform) {
         lastTransform = { x: parseFloat(transform[1]), y: parseFloat(transform[2]) };
