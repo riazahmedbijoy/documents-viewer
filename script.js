@@ -1,4 +1,3 @@
-
 let scale = 1;
 let startDist = 0;
 
