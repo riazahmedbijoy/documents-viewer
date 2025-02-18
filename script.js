@@ -1,5 +1,7 @@
 let scale = 1;
 let startDist = 0;
+let startPos = { x: 0, y: 0 };
+let isDragging = false;
 
 function showImages(type) {
     let container = document.getElementById("imageContainer");
@@ -37,18 +39,27 @@ function showImages(type) {
         <button id="backButton" onclick="backToOptions()">Back</button>
     `;
 
-    // Add pinch-to-zoom functionality
+    // Add pinch-to-zoom and pan functionality
     const images = container.querySelectorAll('.zoomable');
     images.forEach(img => {
         img.addEventListener("touchstart", handleTouchStart, { passive: true });
         img.addEventListener("touchmove", handleTouchMove, { passive: true });
         img.addEventListener("touchend", handleTouchEnd, { passive: true });
+        img.addEventListener("mousedown", handleMouseDown);
+        img.addEventListener("mousemove", handleMouseMove);
+        img.addEventListener("mouseup", handleMouseUp);
     });
 }
 
 function handleTouchStart(e) {
     if (e.touches.length === 2) {
         startDist = getDistance(e.touches[0], e.touches[1]);
+    } else if (e.touches.length === 1) {
+        isDragging = true;
+        startPos = {
+            x: e.touches[0].clientX,
+            y: e.touches[0].clientY
+        };
     }
 }
 
@@ -60,11 +71,17 @@ function handleTouchMove(e) {
         scale = Math.min(Math.max(1, scale), 3); // Limit scale to prevent extreme zoom
         e.target.style.transform = `scale(${scale})`;
         startDist = endDist;
+    } else if (e.touches.length === 1 && isDragging) {
+        let dx = e.touches[0].clientX - startPos.x;
+        let dy = e.touches[0].clientY - startPos.y;
+        let img = e.target;
+        img.style.transform += `translate(${dx}px, ${dy}px)`;
     }
 }
 
 function handleTouchEnd() {
     startDist = 0;  // Reset when touch ends
+    isDragging = false; // Reset dragging state
 }
 
 function getDistance(touch1, touch2) {
@@ -81,4 +98,30 @@ function backToOptions() {
     buttons.querySelectorAll("button").forEach(button => {
         button.style.display = "block";
     });
+}
+
+// Mouse-based dragging support
+function handleMouseDown(e) {
+    isDragging = true;
+    startPos = {
+        x: e.clientX,
+        y: e.clientY
+    };
+}
+
+function handleMouseMove(e) {
+    if (isDragging) {
+        let dx = e.clientX - startPos.x;
+        let dy = e.clientY - startPos.y;
+        let img = e.target;
+        img.style.transform += `translate(${dx}px, ${dy}px)`;
+        startPos = {
+            x: e.clientX,
+            y: e.clientY
+        };
+    }
+}
+
+function handleMouseUp() {
+    isDragging = false;
 }
