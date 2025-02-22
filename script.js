@@ -11,6 +11,7 @@ window.onload = () => {
     if (type) showImages(type);
 };
 
+// Show images based on the button clicked
 function showImages(type) {
     // Update URL without reloading
     history.pushState(null, "", `?type=${type}`);
@@ -45,7 +46,7 @@ function showImages(type) {
         `;
     }
 
-    // Add the back button
+    // Add Back button
     container.innerHTML += `<button id="backButton" onclick="backToOptions()">Back</button>`;
 
     // Add event listeners for zoom and drag
@@ -63,9 +64,16 @@ function showImages(type) {
         img.addEventListener("mousemove", handleMouseMove);
         img.addEventListener("mouseup", handleMouseUp);
         img.addEventListener("mouseleave", handleMouseUp);
+
+        // Click to bring image to front
+        img.addEventListener("click", () => {
+            images.forEach(i => i.classList.remove("active")); // Remove active class from all
+            img.classList.add("active"); // Bring clicked image to front
+        });
     });
 }
 
+// Zoom and Drag Functions
 function handleTouchStart(e) {
     if (e.touches.length === 2) {
         startDist = getDistance(e.touches[0], e.touches[1]);
@@ -121,6 +129,7 @@ function getDistance(touch1, touch2) {
     return Math.sqrt(x * x + y * y);
 }
 
+// Back to Main Menu
 function backToOptions() {
     let container = document.getElementById("imageContainer");
     let buttons = document.getElementById("buttons");
