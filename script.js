@@ -4,7 +4,17 @@ let isDragging = false;
 let startX = 0, startY = 0;
 let translateX = 0, translateY = 0;
 
+// Load image based on URL when page loads
+window.onload = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const type = urlParams.get("type");
+    if (type) showImages(type);
+};
+
 function showImages(type) {
+    // Update URL without reloading
+    history.pushState(null, "", `?type=${type}`);
+
     let container = document.getElementById("imageContainer");
     let buttons = document.getElementById("buttons");
     let allButtons = buttons.querySelectorAll("button");
@@ -41,9 +51,8 @@ function showImages(type) {
     // Add event listeners for zoom and drag
     const images = container.querySelectorAll('.zoomable');
     images.forEach(img => {
-        // Reset transformations
         img.style.transform = `scale(1) translate(0px, 0px)`;
-        
+
         // Touch events (mobile)
         img.addEventListener("touchstart", handleTouchStart, { passive: true });
         img.addEventListener("touchmove", handleTouchMove, { passive: true });
@@ -73,7 +82,7 @@ function handleTouchMove(e) {
         let endDist = getDistance(e.touches[0], e.touches[1]);
         let diff = endDist - startDist;
         scale += diff * 0.01;
-        scale = Math.min(Math.max(1, scale), 3); // Limit scale
+        scale = Math.min(Math.max(1, scale), 3);
         img.style.transform = `scale(${scale}) translate(${translateX}px, ${translateY}px)`;
         startDist = endDist;
     } else if (e.touches.length === 1 && isDragging) {
@@ -116,9 +125,15 @@ function backToOptions() {
     let container = document.getElementById("imageContainer");
     let buttons = document.getElementById("buttons");
     container.innerHTML = "";
+
+    // Reset URL
+    history.pushState(null, "", window.location.pathname);
+
+    // Show all buttons again
     buttons.querySelectorAll("button").forEach(button => {
         button.style.display = "block";
     });
+
     // Reset zoom and position
     scale = 1;
     translateX = 0;
