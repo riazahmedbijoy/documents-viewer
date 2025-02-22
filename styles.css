@@ -1,3 +1,4 @@
+/* General Styles */
 body {
     font-family: Arial, sans-serif;
     text-align: center;
@@ -6,6 +7,7 @@ body {
     padding: 20px;
 }
 
+/* Container */
 .container {
     background: white;
     padding: 20px;
@@ -15,6 +17,7 @@ body {
     margin: auto;
 }
 
+/* Heading */
 h2 {
     color: #333;
     font-family: 'Roboto', sans-serif;
@@ -22,6 +25,7 @@ h2 {
     font-size: 28px;
 }
 
+/* Buttons */
 .buttons {
     display: flex;
     flex-direction: column;
@@ -37,43 +41,40 @@ button {
     background-color: #007BFF;
     color: white;
     font-size: 16px;
+    transition: background-color 0.2s;
 }
 
 button:hover {
     background-color: #0056b3;
 }
 
+#backButton {
+    margin-top: 20px;
+    background-color: #FF5733;
+}
+
+/* Image Container */
 #imageContainer {
     margin-top: 20px;
     overflow: hidden;
     position: relative;
 }
 
+/* Images */
 img {
     width: 100%;
     max-width: 300px;
     margin: 10px;
     border-radius: 5px;
     touch-action: none; /* Disable default touch actions */
-    transition: transform 0.1s ease-out;
-    cursor: grab;
+    position: relative; /* Allow z-index to work */
+    z-index: 1; /* Default layer */
+    transition: transform 0.1s ease, z-index 0s; /* Smooth zoom */
+    cursor: grab; /* Dragging cursor */
 }
 
-img:active {
-    cursor: grabbing;
-}
-
-#backButton {
-    margin-top: 20px;
-    background-color: #FF5733;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-}
-
-#backButton:hover {
-    background-color: #C4411F;
+/* Active Image - Top Layer */
+img.active {
+    z-index: 10; /* Bring active image to front */
+    cursor: grabbing; /* Cursor when dragging */
 }
